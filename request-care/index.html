@@ -213,6 +213,26 @@
     .form-status[data-state="error"] { color: var(--error); }
     .form-status a { font-weight: 750; }
 
+    .success-panel { margin: 1rem 0 0; padding: clamp(1.5rem, 4vw, 2.4rem); border: 1px solid rgba(142,222,203,.32); border-radius: var(--surface); background: #082536; box-shadow: var(--shadow); }
+    .success-badge { width: 4.25rem; height: 4.25rem; margin-bottom: 1.1rem; }
+    .success-badge circle { fill: rgba(142,222,203,.12); stroke: var(--success); stroke-width: 2.5; }
+    .success-badge path { fill: none; stroke: var(--success); stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 36; stroke-dashoffset: 36; animation: phg-check-draw .45s ease-out .35s forwards; }
+    .success-panel.is-shown .success-badge { animation: phg-check-pop .5s var(--ease-out) both; }
+    .success-panel h3 { margin: 0; color: var(--success); font-size: clamp(1.45rem, 3.4vw, 2rem); font-weight: 550; letter-spacing: -.02em; }
+    .success-panel h3:focus { outline: none; }
+    .success-email { margin: .65rem 0 0; color: var(--mist); }
+    .success-email strong { color: var(--porcelain); overflow-wrap: anywhere; }
+    .success-next { margin: 1.6rem 0 0; padding-top: 1.4rem; border-top: 1px solid var(--line); }
+    .success-next h4 { margin: 0; font-size: .8rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+    .success-note { margin: 1.4rem 0 0; color: var(--mist); font-size: .86rem; }
+    .success-again { margin-top: .4rem; padding: 0; border: 0; background: none; color: var(--accent); font: inherit; font-size: .86rem; font-weight: 700; text-decoration: underline; cursor: pointer; }
+    @keyframes phg-check-pop { 0% { transform: scale(.5); opacity: 0; } 60% { transform: scale(1.06); } 100% { transform: scale(1); opacity: 1; } }
+    @keyframes phg-check-draw { to { stroke-dashoffset: 0; } }
+    @media (prefers-reduced-motion: reduce) {
+      .success-badge path { animation: none; stroke-dashoffset: 0; }
+      .success-panel.is-shown .success-badge { animation: none; }
+    }
+
     .contact-section { padding: 0 0 clamp(4.5rem, 10vw, 8rem); }
     .contact-panel { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 2rem; align-items: end; padding: clamp(1.6rem, 4vw, 3rem); border-radius: var(--surface); background: var(--smoke); box-shadow: var(--shadow); }
     .contact-panel h2 { max-width: 17ch; margin: 0; font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 500; letter-spacing: -.03em; line-height: 1.04; }
@@ -685,6 +705,26 @@
               <p class="consent-note">By submitting, you authorize PHG to contact you using the phone number or email address provided regarding this intake request. Review the <a class="context-link" href="/notice-of-privacy-practices/">PHG Notice of Privacy Practices</a>.</p>
             </div>
           </form>
+
+          <div class="success-panel" id="phgSuccessPanel" role="status" hidden>
+            <svg class="success-badge" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+              <circle cx="24" cy="24" r="21.5"></circle>
+              <path d="M14 25l7 7 14-14"></path>
+            </svg>
+            <h3 id="phgSuccessTitle" tabindex="-1">Your request went through</h3>
+            <p class="success-email">A confirmation email is on its way to <strong id="phgSuccessEmail"></strong>.</p>
+            <div class="success-next">
+              <h4>What happens next</h4>
+              <ol class="next-steps">
+                <li>A PHG team member reviews your request and follows up using the contact information you provided.</li>
+                <li>After review, you receive a Client Portal invitation by email.</li>
+                <li>In the portal you complete your medical history, then schedule the visit.</li>
+              </ol>
+            </div>
+            <p class="success-note">Nothing in your inbox after a while? Check your spam folder, or call <a href="tel:14439077938">443-907-7938</a>.<br>
+              <button class="success-again" type="button" id="phgSubmitAnotherBtn">Submit another request</button>
+            </p>
+          </div>
         </div>
       </div>
     </section>
@@ -783,6 +823,10 @@
       const acknowledgment = document.getElementById("phgAcknowledgment");
       const acknowledgmentRow = document.getElementById("phgAcknowledgmentRow");
       const requiredFields = form ? Array.from(form.querySelectorAll("[required]")) : [];
+      const successPanel = document.getElementById("phgSuccessPanel");
+      const successTitle = document.getElementById("phgSuccessTitle");
+      const successEmail = document.getElementById("phgSuccessEmail");
+      const submitAnotherBtn = document.getElementById("phgSubmitAnotherBtn");
 
       function revealHero() { hero.classList.add("is-image-ready"); }
       if (heroImage.complete) revealHero();
@@ -858,6 +902,28 @@
         status.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "center" });
       }
 
+      function showSuccessPanel(email) {
+        if (!successPanel) return;
+        successEmail.textContent = email;
+        form.hidden = true;
+        successPanel.hidden = false;
+        successPanel.classList.remove("is-shown");
+        void successPanel.offsetWidth;
+        successPanel.classList.add("is-shown");
+        const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        successPanel.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "center" });
+        successTitle.focus({ preventScroll: true });
+      }
+
+      if (submitAnotherBtn) {
+        submitAnotherBtn.addEventListener("click", function () {
+          successPanel.hidden = true;
+          form.hidden = false;
+          const first = form.querySelector("input, select, textarea");
+          if (first) first.focus();
+        });
+      }
+
       form.addEventListener("submit", async function (event) {
         event.preventDefault();
         setStatus("", "");
@@ -909,8 +975,7 @@
           try { result = await response.json(); } catch (parseError) { result = null; }
 
           if (result && result.success) {
-            setStatus("success", result.message ||
-              "Your intake request was sent for PHG review. A team member will follow up using the contact information provided.");
+            const submittedEmail = payload.email;
             form.reset();
             requiredFields.forEach(function (field) {
               field.removeAttribute("aria-invalid");
@@ -918,7 +983,14 @@
               if (target) target.textContent = "";
             });
             acknowledgmentRow.dataset.invalid = "false";
-            showStatusAndFocus();
+            if (successPanel) {
+              setStatus("", "");
+              showSuccessPanel(submittedEmail);
+            } else {
+              setStatus("success", result.message ||
+                "Your intake request was sent for PHG review. A team member will follow up using the contact information provided.");
+              showStatusAndFocus();
+            }
           } else if (result && result.message) {
             setStatus("error", result.message);
             showStatusAndFocus();
