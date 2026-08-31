@@ -192,6 +192,11 @@
     .field { display: grid; gap: .48rem; align-content: start; }
     .field label { color: var(--porcelain); font-size: .92rem; font-weight: 650; line-height: 1.35; }
     .req { color: var(--accent); }
+    .who-tabs { display: flex; gap: .6rem; flex-wrap: wrap; }
+    .who-tab { flex: 1 1 200px; padding: .85rem 1rem; border-radius: 12px; border: 1.5px solid var(--line);
+      background: transparent; color: inherit; font: inherit; font-weight: 700; cursor: pointer; text-align: center; }
+    .who-tab[aria-pressed="true"] { border-color: var(--accent); background: rgba(94, 204, 243, 0.12); color: var(--accent); }
+    .who-tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
     .field input, .field select, .field textarea { width: 100%; min-height: 3.45rem; padding: .8rem .9rem; border: 1px solid var(--line-strong); border-radius: var(--control); background: #082536; color: var(--porcelain); font-size: 1rem; line-height: 1.45; caret-color: var(--accent); transition: border-color .18s ease, background-color .18s ease, box-shadow .18s ease; }
     .field textarea { min-height: 9rem; resize: vertical; }
     .field input::placeholder, .field textarea::placeholder { color: #9bb2b8; opacity: 1; }
@@ -603,13 +608,27 @@
 
           <form id="phgIntakeForm" novalidate>
             <fieldset class="form-section">
-              <legend><span class="step-no">1</span>Contact information</legend>
-              <p class="form-hint">Enter the best information for PHG to use when following up.</p>
+              <legend><span class="step-no">1</span>Who is the service for?</legend>
+              <p class="form-hint">Choose one - the contact fields below adjust to match.</p>
+              <div class="who-tabs" role="group" aria-label="Who is the service for">
+                <button type="button" class="who-tab" id="phgForSelfTab" aria-pressed="true" onclick="phgSetServiceFor('SELF')">Service is for myself</button>
+                <button type="button" class="who-tab" id="phgForFamilyTab" aria-pressed="false" onclick="phgSetServiceFor('FAMILY')">Service is for a family member</button>
+              </div>
+            </fieldset>
+
+            <fieldset class="form-section">
+              <legend><span class="step-no">2</span>Contact information</legend>
+              <p class="form-hint" id="phgContactHint">Enter the best information for PHG to use when following up.</p>
               <div class="field-grid">
-                <div class="field field-wide">
-                  <label for="phgFullName">Full name <span class="req" aria-hidden="true">*</span><span class="visually-hidden"> required</span></label>
-                  <input id="phgFullName" name="fullName" type="text" autocomplete="name" required aria-describedby="phgFullNameError">
-                  <p class="field-error" id="phgFullNameError"></p>
+                <div class="field">
+                  <label for="phgFirstName" id="phgFirstNameLabel">First name <span class="req" aria-hidden="true">*</span><span class="visually-hidden"> required</span></label>
+                  <input id="phgFirstName" name="firstName" type="text" autocomplete="given-name" required aria-describedby="phgFirstNameError">
+                  <p class="field-error" id="phgFirstNameError"></p>
+                </div>
+                <div class="field">
+                  <label for="phgLastName" id="phgLastNameLabel">Last name <span class="req" aria-hidden="true">*</span><span class="visually-hidden"> required</span></label>
+                  <input id="phgLastName" name="lastName" type="text" autocomplete="family-name" required aria-describedby="phgLastNameError">
+                  <p class="field-error" id="phgLastNameError"></p>
                 </div>
                 <div class="field">
                   <label for="phgPhone">Phone number <span class="req" aria-hidden="true">*</span><span class="visually-hidden"> required</span></label>
@@ -628,10 +647,43 @@
                   <p class="field-error" id="phgDobError"></p>
                 </div>
               </div>
+              <!-- Requester fields: shown (and required) only when the service
+                   is for a family member. Disabled inputs are excluded from
+                   validation and the submitted payload. -->
+              <div id="phgRequesterBlock" hidden>
+                <p class="form-hint" style="margin-top:1.2rem;"><strong>Your information</strong> &mdash; you are requesting care for the person named above. PHG follows up with you at the phone and email entered above.</p>
+                <div class="field-grid">
+                  <div class="field">
+                    <label for="phgReqFirstName">Your first name <span class="req" aria-hidden="true">*</span><span class="visually-hidden"> required</span></label>
+                    <input id="phgReqFirstName" name="requesterFirstName" type="text" autocomplete="off" required disabled aria-describedby="phgReqFirstNameError">
+                    <p class="field-error" id="phgReqFirstNameError"></p>
+                  </div>
+                  <div class="field">
+                    <label for="phgReqLastName">Your last name <span class="req" aria-hidden="true">*</span><span class="visually-hidden"> required</span></label>
+                    <input id="phgReqLastName" name="requesterLastName" type="text" autocomplete="off" required disabled aria-describedby="phgReqLastNameError">
+                    <p class="field-error" id="phgReqLastNameError"></p>
+                  </div>
+                  <div class="field">
+                    <label for="phgReqRelationship">Your relationship to them <span class="req" aria-hidden="true">*</span><span class="visually-hidden"> required</span></label>
+                    <select id="phgReqRelationship" name="requesterRelationship" required disabled aria-describedby="phgReqRelationshipError">
+                      <option value="" selected disabled>Select relationship</option>
+                      <option>Spouse / Partner</option>
+                      <option>Daughter</option>
+                      <option>Son</option>
+                      <option>Parent</option>
+                      <option>Sibling</option>
+                      <option>Grandchild</option>
+                      <option>Legal guardian / POA</option>
+                      <option>Other family / caregiver</option>
+                    </select>
+                    <p class="field-error" id="phgReqRelationshipError"></p>
+                  </div>
+                </div>
+              </div>
             </fieldset>
 
             <fieldset class="form-section">
-              <legend><span class="step-no">2</span>Service location</legend>
+              <legend><span class="step-no">3</span>Service location</legend>
               <p class="form-hint">Enter the address where the requested service would occur. Review current <a class="context-link" href="/service-areas/">PHG service areas</a>.</p>
               <div class="field-grid">
                 <div class="field field-wide">
@@ -664,9 +716,26 @@
             </fieldset>
 
             <fieldset class="form-section">
-              <legend><span class="step-no">3</span>Care request</legend>
+              <legend><span class="step-no">4</span>Care request</legend>
               <p class="form-hint">Describe the current concern and the service being requested.</p>
               <div class="field-grid">
+                <div class="field field-wide">
+                  <label for="phgServiceType">Service requested <span class="req" aria-hidden="true">*</span><span class="visually-hidden"> required</span></label>
+                  <select id="phgServiceType" name="serviceType" required aria-describedby="phgServiceTypeError">
+                    <option value="" selected disabled>Select a service</option>
+                    <option>Aide Services</option>
+                    <option>IV Therapy / Infusion</option>
+                    <option>Lab Draw</option>
+                    <option>Wound Care</option>
+                    <option>EKG</option>
+                    <option>Nursing Assessment</option>
+                    <option>Catheter Care</option>
+                    <option>Feeding Tube Care</option>
+                    <option>Tracheostomy Care</option>
+                    <option>Other / not sure yet</option>
+                  </select>
+                  <p class="field-error" id="phgServiceTypeError"></p>
+                </div>
                 <div class="field field-wide">
                   <label for="phgChiefComplaint">Chief complaint or requested service <span class="req" aria-hidden="true">*</span><span class="visually-hidden"> required</span></label>
                   <textarea id="phgChiefComplaint" name="chiefComplaint" rows="5" required placeholder="Describe the current symptoms, concern, or requested service." aria-describedby="phgChiefComplaintHelp phgChiefComplaintError"></textarea>
@@ -682,7 +751,7 @@
             </fieldset>
 
             <fieldset class="form-section">
-              <legend><span class="step-no">4</span>Service acknowledgment</legend>
+              <legend><span class="step-no">5</span>Service acknowledgment</legend>
               <p class="form-hint">Review and acknowledge PHG's service model before submitting.</p>
               <div class="ack-row" id="phgAcknowledgmentRow">
                 <input id="phgAcknowledgment" name="acknowledgment" type="checkbox" value="Agreed" required aria-describedby="phgAcknowledgmentError">
@@ -721,6 +790,7 @@
                 <li>In the portal you complete your medical history, then schedule the visit.</li>
               </ol>
             </div>
+            <p class="success-note" style="margin-top:1.2rem;">Want a head start? You don't have to wait for the review &mdash; <a class="context-link" href="https://script.google.com/macros/s/AKfycbxcTJkGgfW2y5VXlKF6VkgSKVdfMqURzo4214bRmnb_0E4eW8e4eETRKiyezjsOH7Rz/exec?page=newclient" target="_blank" rel="noopener">request your PHG Client Account now</a> and you'll be ready to complete your medical history and schedule the moment you're approved.</p>
             <p class="success-note">Nothing in your inbox after a while? Check your spam folder, or call <a href="tel:14439077938">443-907-7938</a>.<br>
               <button class="success-again" type="button" id="phgSubmitAnotherBtn">Submit another request</button>
             </p>
@@ -924,11 +994,51 @@
         });
       }
 
+      /* Myself vs family-member tabs: relabels the shared fields and
+         enables the requester block only when a family member is filing.
+         Disabled inputs stay out of validation and the payload. */
+      let phgServiceFor = "SELF";
+      window.phgSetServiceFor = function (mode) {
+        phgServiceFor = mode === "FAMILY" ? "FAMILY" : "SELF";
+        const family = phgServiceFor === "FAMILY";
+        const selfTab = document.getElementById("phgForSelfTab");
+        const famTab = document.getElementById("phgForFamilyTab");
+        if (selfTab) selfTab.setAttribute("aria-pressed", family ? "false" : "true");
+        if (famTab) famTab.setAttribute("aria-pressed", family ? "true" : "false");
+        const block = document.getElementById("phgRequesterBlock");
+        if (block) {
+          block.hidden = !family;
+          block.querySelectorAll("input, select").forEach(function (f) {
+            f.disabled = !family;
+            if (!family) {
+              f.removeAttribute("aria-invalid");
+              const target = errorElement(f);
+              if (target) target.textContent = "";
+            }
+          });
+        }
+        const req = '<span class="req" aria-hidden="true">*</span><span class="visually-hidden"> required</span>';
+        const firstLabel = document.getElementById("phgFirstNameLabel");
+        const lastLabel = document.getElementById("phgLastNameLabel");
+        const dobLabel = document.querySelector('label[for="phgDob"]');
+        const phoneLabel = document.querySelector('label[for="phgPhone"]');
+        const emailLabel = document.querySelector('label[for="phgEmail"]');
+        if (firstLabel) firstLabel.innerHTML = (family ? "Client's first name " : "First name ") + req;
+        if (lastLabel) lastLabel.innerHTML = (family ? "Client's last name " : "Last name ") + req;
+        if (dobLabel) dobLabel.innerHTML = (family ? "Client's date of birth " : "Date of birth ") + req;
+        if (phoneLabel) phoneLabel.innerHTML = (family ? "Your phone number " : "Phone number ") + req;
+        if (emailLabel) emailLabel.innerHTML = (family ? "Your email address " : "Email address ") + req;
+        const hint = document.getElementById("phgContactHint");
+        if (hint) hint.textContent = family
+          ? "Enter the person receiving care first, then your own contact details - PHG follows up with you."
+          : "Enter the best information for PHG to use when following up.";
+      };
+
       form.addEventListener("submit", async function (event) {
         event.preventDefault();
         setStatus("", "");
 
-        const invalid = requiredFields.filter(function (field) { return !validateField(field); });
+        const invalid = requiredFields.filter(function (field) { return !field.disabled && !validateField(field); });
         if (invalid.length) {
           setStatus("error", "Review the highlighted fields, then submit the request again.");
           invalid[0].focus();
@@ -937,7 +1047,14 @@
 
         const payload = {
           action: "REQUEST_CARE",
-          fullName: form.fullName.value.trim(),
+          serviceFor: phgServiceFor,
+          firstName: form.firstName.value.trim(),
+          lastName: form.lastName.value.trim(),
+          fullName: (form.firstName.value.trim() + " " + form.lastName.value.trim()).trim(),
+          requesterFirstName: phgServiceFor === "FAMILY" ? form.requesterFirstName.value.trim() : "",
+          requesterLastName: phgServiceFor === "FAMILY" ? form.requesterLastName.value.trim() : "",
+          requesterRelationship: phgServiceFor === "FAMILY" ? form.requesterRelationship.value.trim() : "",
+          serviceType: form.serviceType.value.trim(),
           phone: form.phone.value.trim(),
           email: form.email.value.trim(),
           dob: form.dob.value.trim(),
@@ -977,6 +1094,7 @@
           if (result && result.success) {
             const submittedEmail = payload.email;
             form.reset();
+            window.phgSetServiceFor("SELF");
             requiredFields.forEach(function (field) {
               field.removeAttribute("aria-invalid");
               const target = errorElement(field);
