@@ -617,7 +617,7 @@
             </fieldset>
 
             <fieldset class="form-section">
-              <legend><span class="step-no">2</span>Contact information</legend>
+              <legend><span class="step-no">2</span><span id="phgContactLegend">Contact information</span></legend>
               <p class="form-hint" id="phgContactHint">Enter the best information for PHG to use when following up.</p>
               <div class="field-grid">
                 <div class="field">
@@ -651,7 +651,7 @@
                    is for a family member. Disabled inputs are excluded from
                    validation and the submitted payload. -->
               <div id="phgRequesterBlock" hidden>
-                <p class="form-hint" style="margin-top:1.2rem;"><strong>Your information</strong> &mdash; you are requesting care for the person named above. PHG follows up with you at the phone and email entered above.</p>
+                <p class="form-hint" style="margin-top:1.2rem;"><strong>Your Information</strong> &mdash; you are requesting care for the person named above. PHG follows up with you at the phone and email you enter here.</p>
                 <div class="field-grid">
                   <div class="field">
                     <label for="phgReqFirstName">Your first name <span class="req" aria-hidden="true">*</span><span class="visually-hidden"> required</span></label>
@@ -1004,6 +1004,21 @@
         const famTab = document.getElementById("phgForFamilyTab");
         if (selfTab) selfTab.setAttribute("aria-pressed", family ? "false" : "true");
         if (famTab) famTab.setAttribute("aria-pressed", family ? "true" : "false");
+        /* Family tab: your phone/email belong in the Your Information
+           block; Myself tab: back in the client grid before DOB. Move the
+           wrappers first so the hide/disable pass below never touches them. */
+        const phoneField = document.getElementById("phgPhone").closest(".field");
+        const emailField = document.getElementById("phgEmail").closest(".field");
+        if (family) {
+          const reqGrid = document.querySelector("#phgRequesterBlock .field-grid");
+          if (reqGrid && phoneField) { reqGrid.appendChild(phoneField); reqGrid.appendChild(emailField); }
+        } else {
+          const dobField = document.getElementById("phgDob").closest(".field");
+          if (dobField && phoneField) {
+            dobField.parentNode.insertBefore(phoneField, dobField);
+            dobField.parentNode.insertBefore(emailField, dobField);
+          }
+        }
         const block = document.getElementById("phgRequesterBlock");
         if (block) {
           block.hidden = !family;
@@ -1027,9 +1042,11 @@
         if (dobLabel) dobLabel.innerHTML = (family ? "Client's date of birth " : "Date of birth ") + req;
         if (phoneLabel) phoneLabel.innerHTML = (family ? "Your phone number " : "Phone number ") + req;
         if (emailLabel) emailLabel.innerHTML = (family ? "Your email address " : "Email address ") + req;
+        const legendText = document.getElementById("phgContactLegend");
+        if (legendText) legendText.textContent = family ? "Client's Information" : "Contact information";
         const hint = document.getElementById("phgContactHint");
         if (hint) hint.textContent = family
-          ? "Enter the person receiving care first, then your own contact details - PHG follows up with you."
+          ? "Enter the information of the person receiving care."
           : "Enter the best information for PHG to use when following up.";
       };
 
