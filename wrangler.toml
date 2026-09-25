@@ -1,0 +1,5 @@
+# Cloudflare Pages project configuration (used by `wrangler pages deploy` / `wrangler pages dev`).
+# With the Git integration the dashboard settings apply instead: no build command, output directory "public".
+name = "performancehealthgroup"
+compatibility_date = "2026-01-01"
+pages_build_output_dir = "public"

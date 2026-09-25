@@ -1,0 +1,24 @@
+# Performance Health Group - Cloudflare Pages response headers
+
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: SAMEORIGIN
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
+  Strict-Transport-Security: max-age=31536000
+
+# Portal pages embed the Apps Script web apps; never index them.
+/clients/*
+  X-Robots-Tag: noindex
+
+/employees/*
+  X-Robots-Tag: noindex
+
+/assets/*
+  Cache-Control: public, max-age=604800
+
+/styles.css
+  Cache-Control: public, max-age=3600
+
+/site.js
+  Cache-Control: public, max-age=3600

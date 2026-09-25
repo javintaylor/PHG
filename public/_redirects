@@ -1,0 +1,28 @@
+# Performance Health Group - Cloudflare Pages redirects
+# One rule per line: <from> <to> <status>. Evaluated before static files.
+
+# Apex -> www (both hostnames must be attached to the Pages project as custom domains).
+https://performancehealthgroup.org/* https://www.performancehealthgroup.org/:splat 301
+
+# Legacy Google Sites URLs that were linked from the old site.
+/home / 301
+/home/* / 301
+/start-intake /request-care/ 301
+/start-intake/* /request-care/ 301
+/services/ADLs /services/aide-support-services/personal-care/ 301
+/services/ADLs/* /services/aide-support-services/personal-care/ 301
+/services/Medication-Administration /services/skilled-nursing-rn/medication-administration-injections/ 301
+/services/Medication-Administration/* /services/skilled-nursing-rn/medication-administration-injections/ 301
+/services/Phlebotomy /services/skilled-nursing-rn/mobile-phlebotomy/ 301
+/services/Phlebotomy/* /services/skilled-nursing-rn/mobile-phlebotomy/ 301
+/services/Post-Discharge-Support /services/skilled-nursing-rn/post-discharge-support/ 301
+/services/Post-Discharge-Support/* /services/skilled-nursing-rn/post-discharge-support/ 301
+/services/WOC /services/skilled-nursing-rn/wound-ostomy-continence-care/ 301
+/services/WOC/* /services/skilled-nursing-rn/wound-ostomy-continence-care/ 301
+/services/EKG /services/skilled-nursing-rn/12-lead-ekg/ 301
+/services/EKG/* /services/skilled-nursing-rn/12-lead-ekg/ 301
+/services/Advance-Directives /services/skilled-nursing-rn/advance-directive-facilitation/ 301
+/services/Advance-Directives/* /services/skilled-nursing-rn/advance-directive-facilitation/ 301
+
+# After the custom domain is live, uncomment to send the *.pages.dev hostname to the real site:
+# https://performancehealthgroup.pages.dev/* https://www.performancehealthgroup.org/:splat 301
