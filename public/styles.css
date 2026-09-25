@@ -1,0 +1,241 @@
+/* =========================================================================
+   Performance Health Group — shared site header
+   Every page is a self-contained document (per-page styles are inline in
+   each page's <head>, as they were authored). This file carries only the
+   site-wide header/navigation, added for the standalone static site: on
+   Google Sites the top navigation was provided by the Sites chrome.
+   var() fallbacks mirror the design tokens each page defines in :root.
+   ========================================================================= */
+.site-header{
+  position:relative;
+  z-index:40;
+  background:var(--estuary,#061b2a);
+  border-bottom:1px solid var(--line,rgba(185,203,208,.22));
+}
+.header-inner{
+  width:var(--content,min(100% - 2rem,78rem));
+  margin-inline:auto;
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:.4rem 1rem;
+  padding:.75rem 0;
+}
+.header-brand{
+  display:inline-flex;
+  align-items:center;
+  gap:.65rem;
+  color:var(--porcelain,#f4f8f7);
+  font-weight:700;
+  font-size:1.02rem;
+  letter-spacing:.01em;
+  text-decoration:none;
+  white-space:nowrap;
+}
+.site-header .logo-mark{
+  width:2.4rem;
+  height:1.95rem;
+  flex:0 0 auto;
+  border-radius:6px;
+  background-color:rgba(244,248,247,.94);
+  background-image:var(--logo-image,url("/assets/logo.png"));
+  background-position:center;
+  background-repeat:no-repeat;
+  background-size:88%;
+  box-shadow:0 8px 22px rgba(1,11,17,.18);
+}
+.nav-toggle{
+  display:none;
+  margin-left:auto;
+  min-height:2.6rem;
+  padding:.45rem .95rem;
+  border:1px solid var(--line-strong,rgba(185,203,208,.4));
+  border-radius:var(--control-radius,8px);
+  color:var(--porcelain,#f4f8f7);
+  background:transparent;
+  font:inherit;
+  font-weight:700;
+  cursor:pointer;
+}
+.nav-toggle[aria-expanded="true"]{background:var(--smoke,#153d4c)}
+.site-nav{margin-left:auto}
+.nav-list{
+  list-style:none;
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:.1rem;
+  margin:0;
+  padding:0;
+}
+.nav-list>li{position:relative}
+.nav-list>li>a{
+  display:block;
+  padding:.5rem .62rem;
+  border-radius:var(--control-radius,8px);
+  color:var(--porcelain,#f4f8f7);
+  font-size:.94rem;
+  font-weight:600;
+  text-decoration:none;
+  white-space:nowrap;
+}
+.nav-list>li>a:hover{background:var(--smoke,#153d4c);color:var(--accent-strong,#65d1e1)}
+.nav-list>li:not(.nav-cta)>a[aria-current="page"]{color:var(--accent,#45bcd0)}
+.nav-cta>.button{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:2.6rem;
+  margin-left:.35rem;
+  padding:.45rem .95rem;
+  border:1px solid transparent;
+  border-radius:var(--control-radius,8px);
+  color:var(--estuary,#061b2a);
+  background:var(--accent,#45bcd0);
+  font-size:.94rem;
+  font-weight:700;
+  line-height:1;
+  text-decoration:none;
+  white-space:nowrap;
+}
+.nav-cta>.button:hover{background:var(--accent-strong,#65d1e1)}
+.has-menu>.nav-menu{
+  position:absolute;
+  top:100%;
+  left:0;
+  z-index:60;
+  display:none;
+  grid-auto-flow:column;
+  gap:1.4rem;
+  min-width:max-content;
+  padding:1.05rem 1.2rem 1.15rem;
+  border:1px solid var(--line,rgba(185,203,208,.22));
+  border-radius:var(--radius,14px);
+  background:var(--current,#0b3042);
+  box-shadow:var(--shadow,0 28px 72px rgba(1,11,17,.34));
+}
+.has-menu:hover>.nav-menu,
+.has-menu:focus-within>.nav-menu{display:grid}
+.nav-menu-group{display:grid;gap:.1rem;align-content:start;min-width:13.5rem}
+.nav-menu-group a{
+  display:block;
+  padding:.32rem .5rem;
+  border-radius:var(--control-radius,8px);
+  color:var(--mist,#b9cbd0);
+  font-size:.9rem;
+  text-decoration:none;
+}
+.nav-menu-group a:hover{background:var(--smoke,#153d4c);color:var(--porcelain,#f4f8f7)}
+.nav-menu-group a.nav-menu-title{
+  margin-bottom:.15rem;
+  color:var(--accent,#45bcd0);
+  font-weight:700;
+  font-size:.94rem;
+}
+.nav-menu-group a.nav-menu-title:hover{color:var(--accent-strong,#65d1e1)}
+@media (max-width:68rem){
+  .nav-toggle{display:inline-flex;align-items:center}
+  .site-nav{display:none;width:100%;margin-left:0}
+  .site-nav.is-open{display:block;padding-bottom:.6rem}
+  .nav-list{flex-direction:column;align-items:stretch;gap:.1rem}
+  .nav-list>li>a{white-space:normal}
+  .has-menu>.nav-menu{
+    position:static;
+    display:grid;
+    grid-auto-flow:row;
+    gap:.9rem;
+    min-width:0;
+    margin:.15rem 0 .4rem;
+    padding:.85rem .9rem;
+  }
+  .nav-cta>.button{margin:.5rem 0 0;width:100%}
+}
+
+/* =========================================================================
+   Shared site footer (added 2026-09 for the standalone site). Namespaced
+   phg-footer so no page's own footer rules apply; specificity is kept above
+   the element rules pages define (h3, p, a, address).
+   ========================================================================= */
+.phg-footer{
+  position:relative;
+  z-index:1;
+  margin-top:auto;
+  color:var(--mist,#b9cbd0);
+  background:var(--estuary,#061b2a);
+  border-top:1px solid var(--line,rgba(185,203,208,.22));
+  font-size:.92rem;
+  line-height:1.6;
+}
+.phg-footer .phg-footer__inner{
+  width:var(--content,min(100% - 2rem,78rem));
+  margin-inline:auto;
+  padding:2.8rem 0 2rem;
+}
+.phg-footer .phg-footer__grid{
+  display:grid;
+  grid-template-columns:minmax(16rem,1.6fr) repeat(4,minmax(9rem,1fr));
+  gap:2rem 1.6rem;
+  align-items:start;
+}
+.phg-footer .phg-footer__name{
+  display:inline-flex;
+  align-items:center;
+  gap:.65rem;
+  margin:0 0 .7rem;
+  color:var(--porcelain,#f4f8f7);
+  font-weight:700;
+  font-size:1.05rem;
+  text-decoration:none;
+}
+.phg-footer .logo-mark{
+  width:2.4rem;
+  height:1.95rem;
+  flex:0 0 auto;
+  border-radius:6px;
+  background-color:rgba(244,248,247,.94);
+  background-image:var(--logo-image,url("/assets/logo.png"));
+  background-position:center;
+  background-repeat:no-repeat;
+  background-size:88%;
+}
+.phg-footer p{margin:0 0 .75rem;font-size:inherit;line-height:inherit;color:inherit;max-width:none}
+.phg-footer .phg-footer__note{color:var(--porcelain,#f4f8f7)}
+.phg-footer .phg-footer__nap{margin:0;font-style:normal;font-size:.9rem}
+.phg-footer .phg-footer__qualifier{display:block;margin:.2rem 0 .5rem;font-size:.82rem;opacity:.85}
+.phg-footer .phg-footer__group{display:flex;flex-direction:column;gap:.15rem}
+.phg-footer .phg-footer__group h3{
+  margin:0 0 .45rem;
+  color:var(--porcelain,#f4f8f7);
+  font-size:.82rem;
+  font-weight:700;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  line-height:1.3;
+}
+.phg-footer a{
+  color:var(--mist,#b9cbd0);
+  text-decoration:none;
+  text-underline-offset:3px;
+  border-radius:4px;
+}
+.phg-footer a:hover{color:var(--accent-strong,#65d1e1);text-decoration:underline}
+.phg-footer a:focus-visible{outline:2px solid var(--accent,#45bcd0);outline-offset:2px}
+.phg-footer .phg-footer__group a{padding:.16rem 0;font-size:.92rem;line-height:1.45}
+.phg-footer .phg-footer__group a[aria-current="page"]{color:var(--accent,#45bcd0)}
+.phg-footer .phg-footer__legal{
+  margin-top:2.2rem;
+  padding-top:1.2rem;
+  border-top:1px solid var(--line,rgba(185,203,208,.22));
+  font-size:.82rem;
+  opacity:.9;
+}
+.phg-footer .phg-footer__legal p{margin:0 0 .5rem;max-width:80ch}
+.phg-footer .phg-footer__copy{margin-top:.9rem;color:var(--porcelain,#f4f8f7)}
+@media (max-width:68rem){
+  .phg-footer .phg-footer__grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .phg-footer .phg-footer__brand{grid-column:1 / -1}
+}
+@media (max-width:36rem){
+  .phg-footer .phg-footer__grid{grid-template-columns:minmax(0,1fr)}
+}
+.nav-menu-group a[aria-current="page"]{color:var(--porcelain,#f4f8f7);background:var(--smoke,#153d4c)}
