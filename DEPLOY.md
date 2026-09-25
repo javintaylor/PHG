@@ -107,3 +107,47 @@ nameserver route above is simpler and is what Cloudflare recommends.
   `node tools/sync-chrome.mjs`, commit.
 - Manual deploy from a laptop without Git: `npx wrangler login` once, then
   `npx wrangler pages deploy` (reads `wrangler.toml`).
+
+## Automated cutover (for Claude Code)
+
+The owner has asked Claude Code to run steps 1, 3 and 5 through the Cloudflare
+API rather than clicking through the dashboard. The session needs, in the
+environment settings (not pasted into chat):
+
+- `CLOUDFLARE_API_TOKEN` — custom token with Account · *Cloudflare Pages: Edit*,
+  Zone · *Zone: Edit*, Zone · *DNS: Edit*, Zone · *Zone Settings: Edit*;
+  Zone resources: all zones on the account.
+- `CLOUDFLARE_ACCOUNT_ID` — from the Workers & Pages overview page.
+- Network access to `api.cloudflare.com`, `cloudflare-dns.com` (to read the
+  domain's current records over DNS-over-HTTPS) and `registry.npmjs.org`.
+
+Sequence, in order; each step is idempotent and safe to re-run:
+
+1. Read the domain's current public records over DNS-over-HTTPS
+   (`https://cloudflare-dns.com/dns-query?name=…&type=…`): NS, A, AAAA, MX,
+   TXT at the apex; `www`; `google._domainkey`, `_dmarc`, and any mail hosts.
+   Keep the list; it is the source of truth for step 3.
+2. `POST /accounts/{account}/pages/projects` `{name:"performancehealthgroup",
+   production_branch:"main"}` if `GET …/pages/projects/performancehealthgroup`
+   is 404. Then `npx wrangler@4 pages deploy public --project-name
+   performancehealthgroup --branch main` from the `main` checkout, and check
+   `https://performancehealthgroup.pages.dev/` (pages, `/home` redirect,
+   `/clients/`).
+3. `POST /zones` `{name:"performancehealthgroup.org", type:"full",
+   account:{id}}` unless it exists. `POST /zones/{zone}/dns_records/scan`,
+   then compare the zone's records with step 1 and create anything missing
+   (MX, SPF/DKIM/DMARC TXT, verification TXT). Do not add `www` or the apex A
+   record; step 5 sets those. Record the two `name_servers` from the zone.
+4. Hand the two nameservers to the owner for Namecheap (step 4 above) and
+   poll `GET /zones/{zone}` until `status` is `active`.
+5. `POST /accounts/{account}/pages/projects/performancehealthgroup/domains`
+   `{name:"www.performancehealthgroup.org"}` and again for
+   `performancehealthgroup.org`; Cloudflare writes the CNAME records itself
+   (delete any leftover `www` CNAME to `ghs.googlehosted.com` or apex A/AAAA
+   records first). `PATCH /zones/{zone}/settings/always_use_https`
+   `{value:"on"}`.
+6. Verify over HTTPS: `www` serves the site with the `_headers` values, the
+   apex 301s to `www`, `/home` and `/start-intake` 301, `/clients/` returns
+   `X-Robots-Tag: noindex`. Then uncomment the pages.dev line in
+   `public/_redirects`, commit to `main`, and tell the owner to unpublish the
+   Google Site and resubmit the sitemap in Search Console.
